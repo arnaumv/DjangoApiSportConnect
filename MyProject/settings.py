@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'P@ssw0rd',
         'HOST': 'localhost',  
         'PORT': '3306',        
     }
@@ -122,7 +122,6 @@ USE_I18N = True
 USE_TZ = True
 
 CORS_ORIGIN_ALLOW_ALL = True
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 

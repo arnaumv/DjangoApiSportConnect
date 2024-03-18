@@ -1,31 +1,25 @@
+from rest_framework import viewsets
+from .models import User
+from .serializers import UserSerializer
 from django.contrib.auth.hashers import check_password
-from django.db import IntegrityError
-from django.shortcuts import render
-from rest_framework.authtoken.models import Token
-
+from rest_framework import status, views
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import Usuario
-from .serializers import UsuarioSerializer
 
-class UsuarioView(APIView):
-    def post(self, request):
-        serializer = UsuarioSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                serializer.save()
-                return Response(serializer.data, status=201)
-            except IntegrityError:
-                return Response({"error": "A user with this email already exists."}, status=400)
-        return Response(serializer.errors, status=400)
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
-class LoginView(APIView):
-    def post(self, request):
+class LoginView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        username = request.data.get("username", "")
+        password = request.data.get("password", "")
         try:
-            user = Usuario.objects.get(email=request.data.get('email'))
-            if check_password(request.data.get('contrasena'), user.contrasena):
-                return Response({"message": "Login successful"}, status=200)
+            user = User.objects.get(username=username)
+            if check_password(password, user.password):
+                return Response({
+                    'user': UserSerializer(user).data
+                })
             else:
-                return Response({"error": "Invalid password"}, status=400)
-        except Usuario.DoesNotExist:
-            return Response({"error": "User does not exist"}, status=400)
+                return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
