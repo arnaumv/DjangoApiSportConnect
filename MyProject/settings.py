@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'P@ssw0rd',
         'HOST': 'localhost',  
         'PORT': '3306',        
     }
