@@ -45,9 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ],
 }
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
         'USER': 'root',
-        'PASSWORD': 'P@ssw0rd',
+        'PASSWORD': 'root',
         'HOST': 'localhost',  
         'PORT': '3306',        
     }

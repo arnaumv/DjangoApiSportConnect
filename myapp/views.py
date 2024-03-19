@@ -37,14 +37,9 @@ class LoginView(views.APIView):
 # VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
 
 class UserProfileView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, username, *args, **kwargs):
         user = get_object_or_404(User, username=username)
-
-        # Comprobar si el usuario autenticado es el mismo que el usuario cuyos detalles se están solicitando
-        if request.user != user:
-            return Response({"error": "You are not allowed to view this user's profile"}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = UserSerializer(user)
         return Response(serializer.data)
