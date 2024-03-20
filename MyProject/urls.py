@@ -17,7 +17,8 @@ Including another URLconf
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from myapp.views import UserViewSet, LoginView, UserProfileView
+from myapp.views import UserViewSet, LoginView, UserProfileView, create_event
+from django.urls import path
 
 router = DefaultRouter()
 router.register(r'usuario', UserViewSet, basename='usuario')
@@ -28,6 +29,9 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/<str:username>/', UserProfileView.as_view()),
+    path('events/', create_event, name='create_event'),
+
+
 
 
 ]

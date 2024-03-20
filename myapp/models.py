@@ -11,3 +11,14 @@ class User(AbstractUser):
     # Modificar los nombres de los accesores inversos
     groups = models.ManyToManyField(Group, related_name="customuser_groups", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions", blank=True)
+
+
+
+class Event(models.Model):
+    title = models.CharField(max_length=100)
+    sport = models.CharField(max_length=100)
+    date = models.DateField()
+    time = models.TimeField()
+    location = models.CharField(max_length=100)
+    description = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

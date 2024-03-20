@@ -43,3 +43,29 @@ class UserProfileView(views.APIView):
 
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+
+## EVENTO CREAR EVENTO   
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import User, Event
+import json
+
+@csrf_exempt
+def create_event(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        user = User.objects.get(username=username)
+        event = Event.objects.create(
+            title=data.get('title'),
+            sport=data.get('sport'),
+            date=data.get('date'),
+            time=data.get('time'),
+            location=data.get('location'),
+            description=data.get('description'),
+            user=user
+        )
+        return JsonResponse({'message': 'Event created successfully.'}, status=201)
+    
+
