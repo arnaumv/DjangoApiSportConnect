@@ -5,7 +5,8 @@ from django.contrib.auth.hashers import check_password
 from rest_framework import status, views
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-        
+from django.http import JsonResponse
+
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views
 
@@ -45,27 +46,23 @@ class UserProfileView(views.APIView):
         return Response(serializer.data)
 
 
-## EVENTO CREAR EVENTO   
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import User, Event
-import json
 
-@csrf_exempt
-def create_event(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        username = data.get('username')
-        user = User.objects.get(username=username)
-        event = Event.objects.create(
-            title=data.get('title'),
-            sport=data.get('sport'),
-            date=data.get('date'),
-            time=data.get('time'),
-            location=data.get('location'),
-            description=data.get('description'),
-            user=user
-        )
-        return JsonResponse({'message': 'Event created successfully.'}, status=201)
-    
+## VIEW QUE COMPRUEBA EL ID DEL USERANME PARA CREAR EL EVENTO  (CREATE.HTML)
+
+class UserIdView(views.APIView):
+    def get(self, request, username, *args, **kwargs):
+        try:
+            user = User.objects.get(username=username)
+            return JsonResponse({'id': user.id})
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+## VIEW CREAR EVENTO  (CREATE.HTML)
+from rest_framework import viewsets
+from .models import Event
+from .serializers import EventSerializer
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
+#MODELO USUARIO
 class User(AbstractUser):
     username = models.CharField(max_length=100, unique=True)
     email = models.EmailField(max_length=100, unique=True)
@@ -13,6 +14,10 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions", blank=True)
 
 
+
+# MODELO EVENTO
+from django.db import models
+from .models import User
 
 class Event(models.Model):
     title = models.CharField(max_length=100)
