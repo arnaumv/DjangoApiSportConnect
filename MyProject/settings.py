@@ -94,7 +94,16 @@ DATABASES = {
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'amestrevizcaino.cf@iesesteveterradas.cat'  # Tu correo electrónico
+EMAIL_HOST_PASSWORD = ''  # Tu contraseña
 
+
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+SENDGRID_API_KEY = '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'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

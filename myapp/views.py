@@ -66,3 +66,48 @@ class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
+
+## VIEW PARA RESTABLECER CONTRASEÑA
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+@csrf_exempt
+def reset_password(request):
+    if request.method == 'POST':
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')  # Get the email
+            print(f"Resetting password for: {email}")  # Print the email
+
+            # Create the email content
+            message = Mail(
+                from_email='gmail.com',
+                to_emails=email,
+                subject='Restablecer contraseña',
+                html_content='Haz clic en el enlace para restablecer tu contraseña.'
+            )
+
+            try:
+                # Send the email
+                sg = SendGridAPIClient('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')
+                response = sg.send(message)
+                print("Password reset email sent.")
+                return JsonResponse({'status': 'success'})
+            except Exception as e:
+                print(f"Error sending email: {e}")
+                return JsonResponse({'status': 'error', 'errors': str(e)}, status=400)
+        else:
+            print(f"Form errors: {form.errors}")
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    else:
+        print("Invalid request.")
+        return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
+
+from django.contrib.auth.views import PasswordResetConfirmView
+
+class PasswordResetConfirm(PasswordResetConfirmView):
+    template_name = 'registration/password_reset_confirm.html'
