@@ -88,7 +88,23 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         except Event.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
+    
+    @action(detail=False, methods=['get'])
+    def user_subscribed_events(self, request):
+        username = request.query_params.get('username')
+        if username:
+            user = get_object_or_404(User, username=username)
+            try:
+                # Filtrar eventos por los que el usuario está suscrito
+                user_events = EventsJoined.objects.filter(user_id=user.id)
+                event_ids = user_events.values_list('event_id', flat=True)
+                subscribed_events = Event.objects.filter(id__in=event_ids)
+                serializer = self.get_serializer(subscribed_events, many=True)
+                return Response(serializer.data)
+            except:
+                return Response({"detail": "Error occurred while retrieving subscribed events."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({"detail": "Username parameter is missing."}, status=status.HTTP_400_BAD_REQUEST)
 
 ## VIEW PARA UNIRSE A EVENTOS  (INFOEVENT.HTML)
 

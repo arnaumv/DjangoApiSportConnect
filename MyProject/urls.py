@@ -25,6 +25,7 @@ router.register(r'usuario', UserViewSet, basename='usuario')
 router.register(r'event', EventCreateViewSet, basename='event')  
 router.register(r'event-filter', EventViewSet, basename='event-filter') 
 
+
 urlpatterns = [
     path('', include(router.urls)),
     path('login/', LoginView.as_view(), name='login'),
@@ -36,8 +37,9 @@ urlpatterns = [
     path('event/<int:event_id>/participants', get_participants, name='get_participants'),
 
 
-     path('reset_password/', views.reset_password, name='reset_password'),
+    path('reset_password/', views.reset_password, name='reset_password'),
     path('reset/<uidb64>/<token>/', views.PasswordResetConfirm.as_view(), name='password_reset_confirm'),
 
+    path('events/user_subscribed_events/', EventViewSet.as_view({'get': 'user_subscribed_events'}), name='user-subscribed-events'),
 
 ]
