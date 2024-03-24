@@ -15,7 +15,7 @@ class User(AbstractUser):
 
 
 
-# MODELO EVENTO
+# MODELO CREAR EVENTO
 from django.db import models
 from .models import User
 
@@ -27,3 +27,11 @@ class Event(models.Model):
     location = models.CharField(max_length=100)
     description = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image_path = models.CharField(max_length=255, null=True, blank=True)
+
+# MODELO PARA UNIRSE A UN EVENTO
+class EventsJoined(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=255)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    join_date = models.DateTimeField(auto_now_add=True)

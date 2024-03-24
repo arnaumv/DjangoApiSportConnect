@@ -1,6 +1,6 @@
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from .models import User
+from .models import User, EventsJoined
 
 
 ## SERIALIZER PARA USUARIO
@@ -27,3 +27,9 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = '__all__'
+
+## SERIALIZER PARA UNIRSE A UN EVENTO
+class EventsJoinedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventsJoined
+        fields = '__all__'  # Esto incluirá todos los campos de tu modelo en la serialización
