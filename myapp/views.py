@@ -1,14 +1,17 @@
 from rest_framework import viewsets
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, EventsJoinedSerializer
 from django.contrib.auth.hashers import check_password
 from rest_framework import status, views
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
-
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views
+from rest_framework.decorators import api_view
+from .models import EventsJoined
+
 
 # VIEW PARA CREAR USUARIO
 
@@ -62,9 +65,71 @@ from rest_framework import viewsets
 from .models import Event
 from .serializers import EventSerializer
 
-class EventViewSet(viewsets.ModelViewSet):
+class EventCreateViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+
+## VIEW PARA MOSTRAR EVENTOS  (EVENTS.HTML)
+class EventViewSet(viewsets.ModelViewSet):
+    serializer_class = EventSerializer
+
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        sport = self.request.query_params.get('sport', None)
+        if sport is not None:
+            queryset = queryset.filter(sport=sport)
+        return queryset
+
+    @action(detail=True, methods=['get'])
+    def get_event(self, request, pk=None):
+        try:
+            event = Event.objects.get(pk=pk)
+            serializer = EventSerializer(event)
+            return Response(serializer.data)
+        except Event.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+## VIEW PARA UNIRSE A EVENTOS  (INFOEVENT.HTML)
+
+@api_view(['POST'])
+def join_event(request):
+    username = request.data.get('username')
+    event_id = request.data.get('event')
+
+    try:
+        user = User.objects.get(username=username)
+        event = Event.objects.get(pk=event_id)
+    except (User.DoesNotExist, Event.DoesNotExist):
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    events_joined = EventsJoined(user_id=user, username=username, event=event)
+    events_joined.save()
+
+    serializer = EventsJoinedSerializer(events_joined)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+## VIEW PARA MOSTRAR PARTICIPANTES DE UN EVENTO  (INFOEVENT.HTML)
+@api_view(['GET'])
+def get_participants(request, event_id):
+    try:
+        participants = EventsJoined.objects.filter(event_id=event_id)
+        serializer = EventsJoinedSerializer(participants, many=True)
+        return Response(serializer.data)
+    except EventsJoined.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## VIEW PARA RESTABLECER CONTRASEÑA
