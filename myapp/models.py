@@ -8,6 +8,7 @@ class User(AbstractUser):
     password = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     birthdate = models.DateField()
+    description = models.TextField(blank=True, null=True)  # Nuevo campo descripción
 
     # Modificar los nombres de los accesores inversos
     groups = models.ManyToManyField(Group, related_name="customuser_groups", blank=True)
