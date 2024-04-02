@@ -50,10 +50,12 @@ class UserIdView(views.APIView):
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
 
+
 ## VIEW CREAR EVENTO (CREATE.HTML)
 class EventCreateViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+
 
 ## VIEW PARA MOSTRAR EVENTOS (EVENTS.HTML)
 class EventViewSet(viewsets.ModelViewSet):
@@ -91,6 +93,8 @@ class EventViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "Username parameter is missing."}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
 ## VIEW PARA UNIRSE A EVENTOS (INFOEVENT.HTML)
 @api_view(['POST'])
 def join_event(request):
@@ -108,6 +112,8 @@ def join_event(request):
 
     serializer = EventsJoinedSerializer(events_joined)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 ## VIEW PARA SALIR DE EVENTOS (INFOEVENT.HTML)
 @api_view(['POST'])
@@ -142,6 +148,8 @@ def leave_event(request):
         print('EventsJoined not found for user:', user.username, 'and event:', event.title)  # Mensaje para la consola del servidor
         return Response({"message": "El usuario no está unido a este evento"}, status=status.HTTP_404_NOT_FOUND)
     
+
+
 ## VIEW PARA COMPROVAR SI EL USUARIO YA ESTA UNIDO AL EVENTO
 @api_view(['POST'])
 def check_joined(request):
@@ -154,6 +162,9 @@ def check_joined(request):
         user_joined = False
 
     return Response({'joined': user_joined})
+
+
+
 
 ## VIEW PARA SALIR DE LA MLISTA DE PARTICIPANTES DE UN EVENTO
 @api_view(['POST'])
@@ -185,6 +196,10 @@ def get_participants(request, event_id):
     except EventsJoined.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+
+
+
+
 ## VIEW PARA RESTABLECER CONTRASEÑA
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
@@ -192,8 +207,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.contrib.auth.forms import PasswordResetForm
 
 @csrf_exempt
+
 def reset_password(request):
     if request.method == 'POST':
         form = PasswordResetForm(request.POST)
@@ -202,17 +221,13 @@ def reset_password(request):
             print(f"Resetting password for: {email}")  # Print the email
 
             # Create the email content
-            message = Mail(
-                from_email='gmail.com',
-                to_emails=email,
-                subject='Restablecer contraseña',
-                html_content='Haz clic en el enlace para restablecer tu contraseña.'
-            )
+            subject = 'Restablecer contraseña'
+            message = 'Haz clic en el enlace para restablecer tu contraseña.'
+            from_email = 'amestrevizcaino.cf@iesesteveterrads.cat'  # Replace with your Gmail address
 
             try:
                 # Send the email
-                sg = SendGridAPIClient('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')
-                response = sg.send(message)
+                send_mail(subject, message, from_email, [email])
                 print("Password reset email sent.")
                 return JsonResponse({'status': 'success'})
             except Exception as e:
@@ -224,7 +239,6 @@ def reset_password(request):
     else:
         print("Invalid request.")
         return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
-
 from django.contrib.auth.views import PasswordResetConfirmView
 
 class PasswordResetConfirm(PasswordResetConfirmView):
