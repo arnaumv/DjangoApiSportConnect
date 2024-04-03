@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views
 from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
 
 # VIEW PARA CREAR USUARIO
 class UserViewSet(viewsets.ModelViewSet):
@@ -197,22 +198,41 @@ def get_participants(request, event_id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-
-
+## VIEW PARA COMPROBAR SI EL EMAIL EXISTE EN LA TABLA DE USUARIOS
+@csrf_exempt
+def check_email(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        User = get_user_model()
+        exists = User.objects.filter(email=email).exists()
+        return JsonResponse({'exists': exists})
+    else:
+        return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
 
 ## VIEW PARA RESTABLECER CONTRASEÑA
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.contrib.auth.forms import PasswordResetForm
 
-@csrf_exempt
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
+from .forms import PasswordResetForm, PasswordResetConfirmForm
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth import get_user_model
 
+@csrf_exempt
 def reset_password(request):
     if request.method == 'POST':
         form = PasswordResetForm(request.POST)
@@ -220,10 +240,26 @@ def reset_password(request):
             email = form.cleaned_data.get('email')  # Get the email
             print(f"Resetting password for: {email}")  # Print the email
 
+            # Get the user
+            User = get_user_model()
+            user = User.objects.get(email=email)
+
+            # Generate the token
+            token = default_token_generator.make_token(user)
+
+            # Generate the uid
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
             # Create the email content
             subject = 'Restablecer contraseña'
-            message = 'Haz clic en el enlace para restablecer tu contraseña.'
-            from_email = 'amestrevizcaino.cf@iesesteveterrads.cat'  # Replace with your Gmail address
+            current_site = get_current_site(request)
+            password_reset_url = f"http://{current_site.domain}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}"
+            message = f'Haz clic en el enlace para restablecer tu contraseña: {password_reset_url}'
+            from_email = 'sportconnect@gmail.com' 
+
+            # Set is_reset_link_used to False
+            user.is_reset_link_used = False
+            user.save()
 
             try:
                 # Send the email
@@ -239,7 +275,62 @@ def reset_password(request):
     else:
         print("Invalid request.")
         return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
-from django.contrib.auth.views import PasswordResetConfirmView
 
-class PasswordResetConfirm(PasswordResetConfirmView):
-    template_name = 'registration/password_reset_confirm.html'
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import smart_str
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .forms import PasswordResetConfirmForm
+@csrf_exempt
+def password_reset_confirm(request, uidb64, token):
+    message = ''
+    if request.method == 'POST':
+        form = PasswordResetConfirmForm(request.POST)
+        if form.is_valid():
+            try:
+                # Decode the user id
+                uid = smart_str(urlsafe_base64_decode(uidb64))
+
+                # Get the user
+                User = get_user_model()
+                user = User.objects.get(pk=uid)
+
+                # Check if the reset link has been used
+                if user.is_reset_link_used:
+                    message = 'El enlace de restablecimiento ya se ha utilizado'
+                    form = PasswordResetConfirmForm()  # Reset the form
+
+                # Check the token
+                elif not default_token_generator.check_token(user, token):
+                    message = 'Invalid token'
+                    form = PasswordResetConfirmForm()  # Reset the form
+
+                else:
+                    # Get the new passwords
+                    password1 = form.cleaned_data.get('password1')
+                    password2 = form.cleaned_data.get('password2')
+
+                    # Check that the two passwords match
+                    if password1 != password2:
+                        message = 'Las contraseñas no coinciden'
+                        form = PasswordResetConfirmForm()  # Reset the form
+
+                    else:
+                        # Update the user's password
+                        user.set_password(password1)
+                        user.is_reset_link_used = True  # Mark the reset link as used
+                        user.save()
+
+                        # Set the success message
+                        message = 'La contraseña se ha restablecido correctamente'
+
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+                message = 'Invalid uid'
+                form = PasswordResetConfirmForm()  # Reset the form
+
+    else:
+        form = PasswordResetConfirmForm()
+
+    return render(request, 'myapp/password_reset_confirm.html', {'form': form, 'message': message})

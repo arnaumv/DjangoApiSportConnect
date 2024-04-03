@@ -26,8 +26,9 @@ urlpatterns = [
 
 
     path('event/<int:event_id>/participants', get_participants, name='get_participants'),
+    path('check_email/', views.check_email, name='check_email'),
 
     path('reset_password/', views.reset_password, name='reset_password'),
-    path('reset/<uidb64>/<token>/', views.PasswordResetConfirm.as_view(), name='password_reset_confirm'),
+    path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path('events/user_subscribed_events/', EventViewSet.as_view({'get': 'user_subscribed_events'}), name='user-subscribed-events'),
 ]

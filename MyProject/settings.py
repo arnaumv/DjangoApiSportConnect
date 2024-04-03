@@ -85,8 +85,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
-        'USER': 'admin',
-        'PASSWORD': 'P@ssw0rd12345.',
+        'USER': 'root',
+        'PASSWORD': 'root',
         'HOST': 'localhost',  
         'PORT': '3306',        
     }
@@ -148,3 +148,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8001",
     "http://127.0.0.1:5501",
 ]
+
+AUTH_USER_MODEL = 'myapp.User'
