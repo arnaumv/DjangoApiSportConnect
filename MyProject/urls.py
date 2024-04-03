@@ -31,4 +31,7 @@ urlpatterns = [
     path('reset_password/', views.reset_password, name='reset_password'),
     path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path('events/user_subscribed_events/', EventViewSet.as_view({'get': 'user_subscribed_events'}), name='user-subscribed-events'),
+
+    # RL para la vista de actualización de usuario
+    path('update-user/<str:username>/', views.update_user, name='update_user'),
 ]

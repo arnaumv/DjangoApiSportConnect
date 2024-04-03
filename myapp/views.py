@@ -323,3 +323,24 @@ def password_reset_confirm(request, uidb64, token):
         form = PasswordResetConfirmForm()
 
     return render(request, 'myapp/password_reset_confirm.html', {'form': form, 'message': message})
+
+# Vista para actualizar el usuario
+@api_view(['POST'])
+def update_user(request, username):
+    try:
+        user = User.objects.get(username=username)
+        
+        # Verificar y actualizar los campos del usuario con los datos recibidos
+        if 'email' in request.data and request.data['email'] != "":
+            user.email = request.data['email']
+        if 'password' in request.data and request.data['password'] != "":
+            user.set_password(request.data['password'])
+        if 'description' in request.data and request.data['description'] != "":
+            user.description = request.data['description']
+        if 'birthdate' in request.data and request.data['birthdate'] != "":
+            user.birthdate = request.data['birthdate']
+        
+        user.save()
+        return JsonResponse({'message': 'Los canvios se han restablecido correctamente'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
