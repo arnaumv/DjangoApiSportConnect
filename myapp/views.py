@@ -11,6 +11,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from .forms import PasswordResetForm, PasswordResetConfirmForm
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth import get_user_model
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import smart_str
+
+
 
 # VIEW PARA CREAR USUARIO
 class UserViewSet(viewsets.ModelViewSet):
@@ -198,6 +212,7 @@ def get_participants(request, event_id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+
 ## VIEW PARA COMPROBAR SI EL EMAIL EXISTE EN LA TABLA DE USUARIOS
 @csrf_exempt
 def check_email(request):
@@ -209,29 +224,9 @@ def check_email(request):
     else:
         return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
 
-## VIEW PARA RESTABLECER CONTRASEÑA
-from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.tokens import default_token_generator
-from django.http import JsonResponse
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-from django.core.mail import send_mail
-from django.http import JsonResponse
-from django.contrib.auth.forms import PasswordResetForm
 
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.core.mail import send_mail
-from django.views.decorators.csrf import csrf_exempt
-from .forms import PasswordResetForm, PasswordResetConfirmForm
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
-from django.contrib.auth import get_user_model
-
+## VIEW PARA ENVIAR MENSAJE DE CORREO ELECTRONICO PARA RESTABLECER CONTRASEÑA
 @csrf_exempt
 def reset_password(request):
     if request.method == 'POST':
@@ -276,13 +271,7 @@ def reset_password(request):
         print("Invalid request.")
         return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
 
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import smart_str
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .forms import PasswordResetConfirmForm
+# VIEW PARA RESTABLECER LA CONTRASEÑA
 @csrf_exempt
 def password_reset_confirm(request, uidb64, token):
     message = ''
