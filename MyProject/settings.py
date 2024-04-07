@@ -88,7 +88,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
-        'USER': 'Admin',
+        'USER': 'admin',
         'PASSWORD': 'P@ssw0rd12345.',
         'HOST': 'localhost',  
         'PORT': '3306',        
