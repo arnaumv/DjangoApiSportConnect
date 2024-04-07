@@ -344,3 +344,15 @@ def update_user(request, username):
         return JsonResponse({'message': 'Los canvios se han restablecido correctamente'})
     except User.DoesNotExist:
         return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
+    
+
+#VIEW PARA NOTIFICACIONES 
+from django.http import JsonResponse
+from django.views import View
+from .models import EventsJoined
+
+class EventsJoinedView(View):
+    def get(self, request, *args, **kwargs):
+        username = request.GET.get('username')
+        events = EventsJoined.objects.filter(user_id__username=username).values('join_date', 'event__title', 'event__sport', 'event__location', 'event__date', 'event__time')
+        return JsonResponse(list(events), safe=False)

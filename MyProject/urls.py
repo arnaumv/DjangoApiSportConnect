@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from myapp.views import (
-    UserViewSet, LoginView, UserProfileView, EventCreateViewSet,
+    UserViewSet, LoginView, UserProfileView, EventCreateViewSet, EventsJoinedView,
     EventViewSet, UserIdView, join_event, get_participants, leave_event  # Importa la nueva vista leave_event
 )
 from myapp import views
@@ -32,6 +32,8 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
     path('events/user_subscribed_events/', EventViewSet.as_view({'get': 'user_subscribed_events'}), name='user-subscribed-events'),
 
-    # RL para la vista de actualización de usuario
+    path('api/eventsjoined/', EventsJoinedView.as_view()),
+
+    # uRL para la vista de actualización de usuario
     path('update-user/<str:username>/', views.update_user, name='update_user'),
 ]
