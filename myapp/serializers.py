@@ -4,7 +4,25 @@ from .models import User, EventsJoined
 
 
 ## SERIALIZER PARA USUARIO
+from rest_framework import serializers
+
+class CustomDateField(serializers.DateField):
+    def to_representation(self, value):
+        # Convierte la fecha en formato 'dd/mm/aaaa' para su representación
+        return value.strftime('%d/%m/%Y')
+
+    def to_internal_value(self, value):
+        from django.utils.dateparse import parse_date
+        try:
+            # Intenta parsear la fecha en formato 'dd/mm/aaaa'
+            return parse_date(value)
+        except ValueError:
+            # Si ocurre un error, devuelve un ValidationError personalizado
+            raise serializers.ValidationError('Fecha con formato erróneo. Use el formato dd/mm/aaaa.')
+
 class UserSerializer(serializers.ModelSerializer):
+    birthdate = CustomDateField()
+
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'city', 'birthdate', 'description'] 
@@ -16,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         # Hashear la contraseña antes de guardar el usuario
         validated_data['password'] = make_password(validated_data.get('password'))
         return super(UserSerializer, self).create(validated_data)
+
     
 
 
