@@ -354,23 +354,32 @@ from .models import EventsJoined
 class EventsJoinedView(View):
     def get(self, request, *args, **kwargs):
         username = request.GET.get('username')
-        events = EventsJoined.objects.filter(user_id__username=username, notify_deleted=False).values('join_date', 'event__title', 'event__sport', 'event__location', 'event__date', 'event__time')  # Solo devolver eventos no eliminados
+        events = EventsJoined.objects.filter(user_id__username=username, notify_deleted=False).values('join_date', 'event__title', 'event__sport', 'event__location', 'event__date', 'event__time', 'event__id')  # Include event__id in the returned fields
         return JsonResponse(list(events), safe=False)
-    
-# VIEW PARA COMPROBAR SI EL USUARIO HA ELIMIANDO LA NOTIFIACCION DE UN EVENTO
+
+
+# VIEW PARRA CUANDO EL USUARIO ELIMINA UNA NOTIFICACION
+
+import json
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .models import EventsJoined
+from django.core.exceptions import ObjectDoesNotExist
 
+@csrf_exempt
 def delete_notification(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        event_id = request.POST.get('eventId')
-        notify_deleted = request.POST.get('notify_deleted')
+        data = json.loads(request.body)
+        username = data.get('username')
+        event_id = data.get('event_id')
 
-        event = EventsJoined.objects.get(id=event_id, user_id__username=username)
-        event.notify_deleted = notify_deleted
-        event.save()
+        print('Username:', username)  # Print the username
+        print('Event ID:', event_id)  # Print the event id
 
-        return JsonResponse({'status': 'success'})
-
-    return JsonResponse({'status': 'failed'})
+        try:
+            event = EventsJoined.objects.get(user_id__username=username, event__id=event_id)
+            event.notify_deleted = True
+            event.save()
+            return JsonResponse({'status': 'success'})
+        except ObjectDoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found'})
