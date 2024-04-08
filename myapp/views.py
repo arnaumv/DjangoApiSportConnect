@@ -346,7 +346,7 @@ def update_user(request, username):
         return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
     
 
-# VIEW PARA MOSTRAR NOTIFICACIONES 
+# VIEW PARA MOSTRAR NOTIFICACIONES CUANDO SE UNE A UN EVENTO.  
 from django.http import JsonResponse
 from django.views import View
 from .models import EventsJoined
