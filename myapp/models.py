@@ -36,3 +36,4 @@ class EventsJoined(models.Model):
     username = models.CharField(max_length=255)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     join_date = models.DateTimeField(auto_now_add=True)
+    notify_deleted = models.BooleanField(default=False)  # Nueva columna

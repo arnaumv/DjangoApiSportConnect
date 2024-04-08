@@ -33,6 +33,7 @@ urlpatterns = [
     path('events/user_subscribed_events/', EventViewSet.as_view({'get': 'user_subscribed_events'}), name='user-subscribed-events'),
 
     path('api/eventsjoined/', EventsJoinedView.as_view()),
+    path('api/eventsjoined/delete/', views.delete_notification, name='delete_notification'),
 
     # uRL para la vista de actualización de usuario
     path('update-user/<str:username>/', views.update_user, name='update_user'),
