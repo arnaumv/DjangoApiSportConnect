@@ -346,7 +346,7 @@ def update_user(request, username):
         return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
     
 
-#VIEW PARA NOTIFICACIONES 
+# VIEW PARA MOSTRAR NOTIFICACIONES 
 from django.http import JsonResponse
 from django.views import View
 from .models import EventsJoined
@@ -354,5 +354,23 @@ from .models import EventsJoined
 class EventsJoinedView(View):
     def get(self, request, *args, **kwargs):
         username = request.GET.get('username')
-        events = EventsJoined.objects.filter(user_id__username=username).values('join_date', 'event__title', 'event__sport', 'event__location', 'event__date', 'event__time')
+        events = EventsJoined.objects.filter(user_id__username=username, notify_deleted=False).values('join_date', 'event__title', 'event__sport', 'event__location', 'event__date', 'event__time')  # Solo devolver eventos no eliminados
         return JsonResponse(list(events), safe=False)
+    
+# VIEW PARA COMPROBAR SI EL USUARIO HA ELIMIANDO LA NOTIFIACCION DE UN EVENTO
+from django.http import JsonResponse
+from .models import EventsJoined
+
+def delete_notification(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        event_id = request.POST.get('eventId')
+        notify_deleted = request.POST.get('notify_deleted')
+
+        event = EventsJoined.objects.get(id=event_id, user_id__username=username)
+        event.notify_deleted = notify_deleted
+        event.save()
+
+        return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'status': 'failed'})
