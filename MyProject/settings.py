@@ -59,6 +59,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'django.middleware.locale.LocaleMiddleware',
+
 ]
 
 ROOT_URLCONF = 'MyProject.urls'
@@ -85,7 +88,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
-        'USER': 'admin',
+        'USER': 'Admin',
         'PASSWORD': 'P@ssw0rd12345.',
         'HOST': 'localhost',  
         'PORT': '3306',        
@@ -123,9 +126,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
-TIME_ZONE = 'UTC'
+LANGUAGES = [
+    ('es', 'Spanish'),
+    #('en', 'English'),
+    # Otros idiomas si lo deseas
+]
+
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -147,6 +156,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8001",
     "http://127.0.0.1:5501",
+     "http://127.0.0.1:8000",
+     "http://localhost:8000",
 ]
 
-AUTH_USER_MODEL = 'myapp.User'
+#AUTH_USER_MODEL = 'myapp.User'
