@@ -43,7 +43,7 @@ from rest_framework import serializers
 from .models import Event
 
 class EventSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)  # Utilizamos el UserSerializer para el campo user
+    #user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), write_only=True)
 
     class Meta:
         model = Event
