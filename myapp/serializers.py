@@ -43,6 +43,8 @@ from rest_framework import serializers
 from .models import Event
 
 class EventSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)  # Utilizamos el UserSerializer para el campo user
+
     class Meta:
         model = Event
         fields = '__all__'
