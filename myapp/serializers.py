@@ -43,12 +43,14 @@ from rest_framework import serializers
 from .models import Event
 
 class EventSerializer(serializers.ModelSerializer):
-    #user_id = serializers.PrimaryKeyRelatedField(source='user', queryset=User.objects.all(), write_only=True)
-
     class Meta:
         model = Event
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['creator_username'] = instance.user.username
+        return representation
 ## SERIALIZER PARA UNIRSE A UN EVENTO
 class EventsJoinedSerializer(serializers.ModelSerializer):
     class Meta:
