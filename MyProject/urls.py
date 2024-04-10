@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from myapp.views import (
     UserViewSet, LoginView, UserProfileView, EventCreateViewSet, EventsJoinedView,
-    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification # Importa la nueva vista leave_event
+    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView # Importa la nueva vista leave_event
 )
 from myapp import views
 
@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/eventsjoined/', EventsJoinedView.as_view()),
     #path('api/eventsjoined/delete/', views.delete_notification, name='delete_notification'),
     path('api/deleteNotification/', delete_notification, name='delete_notification'),
+    path('api/eventscreated/', EventsCreatedView.as_view(), name='events-created'),
 
     # uRL para la vista de actualización de usuario
     path('update-user/<str:username>/', views.update_user, name='update_user'),

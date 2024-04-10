@@ -29,6 +29,7 @@ class Event(models.Model):
     description = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     image_path = models.CharField(max_length=255, null=True, blank=True)
+    deleted_notify = models.BooleanField(default=False)
 
 # MODELO PARA UNIRSE A UN EVENTO
 class EventsJoined(models.Model):
