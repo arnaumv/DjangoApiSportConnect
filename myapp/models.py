@@ -31,6 +31,9 @@ class Event(models.Model):
     image_path = models.CharField(max_length=255, null=True, blank=True)
     deleted_notify = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.title} - {self.sport} - {self.date}"
+
 # MODELO PARA UNIRSE A UN EVENTO
 class EventsJoined(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
