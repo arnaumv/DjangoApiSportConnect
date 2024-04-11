@@ -80,7 +80,7 @@ class EventViewSet(viewsets.ModelViewSet):
         queryset = Event.objects.all()
         sport = self.request.query_params.get('sport', None)
         if sport is not None:
-            queryset = queryset.filter(sport=sport)
+            queryset = queryset.filter(sport__iexact=sport)  # Case-insensitive exact match
         return queryset
 
     @action(detail=True, methods=['get'])
