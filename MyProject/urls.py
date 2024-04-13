@@ -42,4 +42,8 @@ urlpatterns = [
 
     # uRL para la vista de actualización de usuario
     path('update-user/<str:username>/', views.update_user, name='update_user'),
+
+    #calcelar evento
+    path('delete_event/', views.delete_event, name='delete_event'),
+
 ]
