@@ -80,7 +80,7 @@ class EventViewSet(viewsets.ModelViewSet):
         queryset = Event.objects.all()
         sport = self.request.query_params.get('sport', None)
         if sport is not None:
-            queryset = queryset.filter(sport=sport)
+            queryset = queryset.filter(sport__iexact=sport)  # Case-insensitive exact match
         return queryset
 
     @action(detail=True, methods=['get'])
@@ -324,7 +324,7 @@ def password_reset_confirm(request, uidb64, token):
 
     return render(request, 'myapp/password_reset_confirm.html', {'form': form, 'message': message})
 
-# Vista para actualizar el usuario
+# VIEW PARA ACTUALIZAR LOS DATOS DEL USUARIO
 @api_view(['POST'])
 def update_user(request, username):
     try:
@@ -363,7 +363,7 @@ class EventsJoinedView(View):
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from .models import EventsJoined
+from .models import EventsJoined, Event
 from django.core.exceptions import ObjectDoesNotExist
 
 @csrf_exempt
@@ -377,9 +377,40 @@ def delete_notification(request):
         print('Event ID:', event_id)  # Print the event id
 
         try:
+            # Try to find the event in the EventsJoined model
             event = EventsJoined.objects.get(user_id__username=username, event__id=event_id)
             event.notify_deleted = True
             event.save()
-            return JsonResponse({'status': 'success'})
         except ObjectDoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Event not found'})
+            try:
+                # If not found in EventsJoined, try to find it in the Event model
+                event = Event.objects.get(user__username=username, id=event_id)
+                event.deleted_notify = True
+                event.save()
+            except ObjectDoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Event not found'})
+
+        return JsonResponse({'status': 'success'})
+        
+## VIEW PARA SELECCIOANR LOS EVENTOS CREADOS POR EL USUARIO Y MOSTRARLOS EN LAS NOTIFICACIONES
+from django.http import JsonResponse
+from django.views import View
+from django.core.exceptions import ObjectDoesNotExist
+from .models import Event, User
+
+class EventsCreatedView(View):
+    def get(self, request, *args, **kwargs):
+        username = request.GET.get('username')
+        print(f"Username received: {username}")  # Print the received username
+        try:
+            user = User.objects.get(username=username)
+            print(f"User found: {user}")  # Print the found user
+
+            # Filter out events that have deleted_notify set to True
+            events = Event.objects.filter(user=user.id, deleted_notify=False).values('date', 'title', 'sport', 'location', 'date', 'time', 'id')
+            print(f"Events found: {events}")  # Print the found events
+
+            return JsonResponse(list(events), safe=False)
+        except ObjectDoesNotExist:
+            print("User not found")  # Print a message when the user is not found
+            return JsonResponse({'error': 'Usuario no encontrado'}, status=404)

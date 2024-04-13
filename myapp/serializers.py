@@ -47,6 +47,10 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['creator_username'] = instance.user.username
+        return representation
 ## SERIALIZER PARA UNIRSE A UN EVENTO
 class EventsJoinedSerializer(serializers.ModelSerializer):
     class Meta:
