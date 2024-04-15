@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -170,3 +174,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 #AUTH_USER_MODEL = 'myapp.User'
+
+MEDIA_URL = '/Media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'myapp', 'Media')
+
+
+# Configuración para archivos multimedia
+MEDIA_URL = '/Media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'myapp', 'Media')  # Ruta absoluta a la carpeta media
+

@@ -16,6 +16,7 @@ router.register(r'event-filter', EventViewSet, basename='event-filter')
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
+    path('', include('myapp.urls')),
 
     path('login/', LoginView.as_view(), name='login'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -45,5 +46,8 @@ urlpatterns = [
 
     #calcelar evento
     path('delete_event/', views.delete_event, name='delete_event'),
+    
+    #actualizar foto de perfil
+    path('upload-profile-picture/', views.upload_profile_picture, name='upload_profile_picture'),
 
 ]

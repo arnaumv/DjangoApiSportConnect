@@ -10,6 +10,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=100)
     birthdate = models.DateField()
     description = models.TextField(blank=True, null=True)  # Nuevo campo descripción
+    image_path = models.CharField(max_length=255, null=True, blank=True)
     is_reset_link_used = models.BooleanField(default=False)  # Add this line
 
     # Modificar los nombres de los accesores inversos

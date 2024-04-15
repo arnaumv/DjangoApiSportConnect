@@ -49,7 +49,7 @@ class LoginView(views.APIView):
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-# VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
+# VIEW PARA DEVOLVER INFORMACION DEL USUARIO (PROFILE.HTML)
 class UserProfileView(views.APIView):
     def get(self, request, username, *args, **kwargs):
         user = get_object_or_404(User, username=username)
@@ -344,6 +344,29 @@ def update_user(request, username):
         return JsonResponse({'message': 'Los canvios se han restablecido correctamente'})
     except User.DoesNotExist:
         return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
+    
+    
+# VIEW PARA ACTUALIZAR LA FOTO DE PERFIL DEL USUARIO
+
+def upload_profile_picture(request):
+    if request.method == 'POST' and request.FILES.get('foto_perfil'):
+        foto_perfil = request.FILES['foto_perfil']
+
+        # Obtener el usuario actual
+        user = request.user
+
+        # Guardar la imagen en algún lugar en los medios de Django
+        # Ejemplo: en el directorio 'media/Profile_Photos/'
+        user.image_path = 'Profile_Photos/' + foto_perfil.name
+
+        # Guardar la imagen del usuario
+        user.save()
+
+        # Enviar una respuesta JSON con un mensaje
+        return JsonResponse({'mensaje': 'Foto de perfil actualizada exitosamente'})
+
+    return JsonResponse({'error': 'Se esperaba una imagen de perfil'}, status=400)
+
     
 
 # VIEW PARA MOSTRAR NOTIFICACIONES CUANDO SE UNE A UN EVENTO.  
