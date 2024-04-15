@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'myapp',
+    'channels',
     'django.contrib.admin',
     'corsheaders',
     'rest_framework',
@@ -83,12 +84,20 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'MyProject.wsgi.application'
+ASGI_APPLICATION = 'MyProject.routing.application'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
-        'USER': 'admin',
+        'USER': 'Admin',
         'PASSWORD': 'P@ssw0rd12345.',
         'HOST': 'localhost',  
         'PORT': '3306',        
