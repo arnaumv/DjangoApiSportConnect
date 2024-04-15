@@ -414,3 +414,21 @@ class EventsCreatedView(View):
         except ObjectDoesNotExist:
             print("User not found")  # Print a message when the user is not found
             return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
+        
+
+#ELEIMINAR UN EVENTO
+@csrf_exempt
+def delete_event(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        event_id = request.POST.get('event_id')
+
+        try:
+            # Buscar el evento
+            event = Event.objects.get(id=event_id, user__username=username)
+            event.delete()
+            return JsonResponse({'message': 'Evento borrado correctamente'})
+        except Event.DoesNotExist:
+            return JsonResponse({'error': 'No se encontró el evento'}, status=404)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
