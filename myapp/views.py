@@ -325,6 +325,18 @@ def password_reset_confirm(request, uidb64, token):
     return render(request, 'myapp/password_reset_confirm.html', {'form': form, 'message': message})
 
 # VIEW PARA ACTUALIZAR LOS DATOS DEL USUARIO
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+import os
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
+from django.contrib.auth import get_user_model
+from django.conf import settings
+import os
+
+
 @api_view(['POST'])
 def update_user(request, username):
     try:
@@ -339,9 +351,18 @@ def update_user(request, username):
             user.description = request.data['description']
         if 'birthdate' in request.data and request.data['birthdate'] != "":
             user.birthdate = request.data['birthdate']
-        
+
+        # Manejar la subida de la imagen
+        if 'image' in request.FILES:
+            image = request.FILES['image']
+            fs = FileSystemStorage()
+            filename = fs.save(image.name, image)
+            image_url = fs.url(filename)
+            image_path = os.path.join(settings.MEDIA_ROOT, image_url.lstrip('/'))
+            user.image_path = image_path
+
         user.save()
-        return JsonResponse({'message': 'Los canvios se han restablecido correctamente'})
+        return JsonResponse({'message': 'Los cambios se han restablecido correctamente', 'image_url': image_url})
     except User.DoesNotExist:
         return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
     
@@ -432,3 +453,28 @@ def delete_event(request):
             return JsonResponse({'error': 'No se encontró el evento'}, status=404)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+
+
+
+
+# @csrf_exempt
+# def upload_image(request, username):
+#     if request.method == 'POST':
+#         image = request.FILES['image']
+#         fs = FileSystemStorage()
+#         filename = fs.save(image.name, image)
+#         image_url = fs.url(filename)
+
+#         # Concatenar MEDIA_ROOT con la URL de la imagen para obtener la ruta completa
+#         image_path = os.path.join(settings.MEDIA_ROOT, image_url.lstrip('/'))
+
+#         User = get_user_model()
+#         try:
+#             user = User.objects.get(username=username)
+#             user.image_path = image_path
+#             user.save()
+#         except User.DoesNotExist:
+#             return JsonResponse({'error': 'User does not exist'}, status=404)
+
+#         return JsonResponse({'image_url': image_url})

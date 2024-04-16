@@ -7,6 +7,8 @@ from myapp.views import (
     EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView # Importa la nueva vista leave_event
 )
 from myapp import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 router = DefaultRouter()
 router.register(r'usuario', UserViewSet, basename='usuario')
@@ -46,4 +48,9 @@ urlpatterns = [
     #calcelar evento
     path('delete_event/', views.delete_event, name='delete_event'),
 
+# path('upload-image/<str:username>/', views.upload_image, name='upload_image'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

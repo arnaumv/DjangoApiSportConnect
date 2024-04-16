@@ -169,4 +169,7 @@ CORS_ALLOWED_ORIGINS = [
      "http://localhost:8000",
 ]
 
+
+MEDIA_ROOT = '/home/super/Documents/GitHub/DjangoApiSportConnect/myapp/Media/profile_photos'
+MEDIA_URL = '/Media/profile_photos/'
 #AUTH_USER_MODEL = 'myapp.User'
