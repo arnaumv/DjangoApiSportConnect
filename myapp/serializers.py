@@ -20,12 +20,16 @@ class CustomDateField(serializers.DateField):
             # Si ocurre un error, devuelve un ValidationError personalizado
             raise serializers.ValidationError('Fecha con formato erróneo. Use el formato dd/mm/aaaa.')
 
+from rest_framework import serializers
+from .models import User
+
 class UserSerializer(serializers.ModelSerializer):
     birthdate = CustomDateField()
+    image_path = serializers.SerializerMethodField()  # Añadir este campo
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'city', 'birthdate', 'description', "image_path"] 
+        fields = ['username', 'email', 'password', 'city', 'birthdate', 'description', "image_path"]
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -34,6 +38,11 @@ class UserSerializer(serializers.ModelSerializer):
         # Hashear la contraseña antes de guardar el usuario
         validated_data['password'] = make_password(validated_data.get('password'))
         return super(UserSerializer, self).create(validated_data)
+
+    def get_image_path(self, obj):  # Añadir este método
+        if obj.image_path:
+            return obj.image_path.url
+        return None
 
     
 

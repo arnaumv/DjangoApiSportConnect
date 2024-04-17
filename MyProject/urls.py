@@ -7,6 +7,8 @@ from myapp.views import (
     EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView # Importa la nueva vista leave_event
 )
 from myapp import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 router = DefaultRouter()
 router.register(r'usuario', UserViewSet, basename='usuario')
@@ -50,4 +52,5 @@ urlpatterns = [
     #actualizar foto de perfil
     path('upload-profile-picture/', views.upload_profile_picture, name='upload_profile_picture'),
 
-]
+# path('upload-image/<str:username>/', views.upload_image, name='upload_image'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

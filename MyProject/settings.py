@@ -173,13 +173,8 @@ CORS_ALLOWED_ORIGINS = [
      "http://localhost:8000",
 ]
 
+
+MEDIA_ROOT = '/home/xavi/Documents/GitHub/DjangoApiSportConnect/myapp/Media/profile_photos/'
+MEDIA_URL = '/Media/profile_photos/'
 #AUTH_USER_MODEL = 'myapp.User'
-
-MEDIA_URL = '/Media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'myapp', 'Media')
-
-
-# Configuración para archivos multimedia
-MEDIA_URL = '/Media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'myapp', 'Media')  # Ruta absoluta a la carpeta media
 
