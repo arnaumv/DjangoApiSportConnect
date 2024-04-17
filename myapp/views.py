@@ -50,11 +50,13 @@ class LoginView(views.APIView):
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 # VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
+
+
 class UserProfileView(views.APIView):
     def get(self, request, username, *args, **kwargs):
         user = get_object_or_404(User, username=username)
         serializer = UserSerializer(user)
-        return Response(serializer.data)
+        return Response(serializer.data)  # Devolver los datos serializados directamente
 
 ## VIEW QUE COMPRUEBA EL ID DEL USERANME PARA CREAR EL EVENTO (CREATE.HTML)
 class UserIdView(views.APIView):
@@ -356,13 +358,11 @@ def update_user(request, username):
         if 'image' in request.FILES:
             image = request.FILES['image']
             fs = FileSystemStorage()
-            filename = fs.save(image.name, image)
-            image_url = fs.url(filename)
-            image_path = os.path.join(settings.MEDIA_ROOT, image_url.lstrip('/'))
-            user.image_path = image_path
+            filename = fs.save(image.name, image)  # Eliminar 'profile_photos/' aquí
+            user.image_path = filename  # Guardar solo la ruta relativa aquí
 
         user.save()
-        return JsonResponse({'message': 'Los cambios se han restablecido correctamente', 'image_url': image_url})
+        return JsonResponse({'message': 'Los cambios se han restablecido correctamente', 'image_url': user.image_path.url})
     except User.DoesNotExist:
         return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
     

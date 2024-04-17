@@ -49,8 +49,4 @@ urlpatterns = [
     path('delete_event/', views.delete_event, name='delete_event'),
 
 # path('upload-image/<str:username>/', views.upload_image, name='upload_image'),
-]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
