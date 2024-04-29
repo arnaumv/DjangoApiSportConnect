@@ -81,8 +81,11 @@ class EventViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Event.objects.all()
         sport = self.request.query_params.get('sport', None)
+        location = self.request.query_params.get('location', None)  # Obtén la ubicación de los parámetros de consulta
         if sport is not None:
             queryset = queryset.filter(sport__iexact=sport)  # Case-insensitive exact match
+        if location is not None:
+            queryset = queryset.filter(location__icontains=location)  # Case-insensitive contains match
         return queryset
 
     @action(detail=True, methods=['get'])
@@ -214,14 +217,13 @@ def get_participants(request, event_id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-
 ## VIEW PARA COMPROBAR SI EL EMAIL EXISTE EN LA TABLA DE USUARIOS
 @csrf_exempt
 def check_email(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         User = get_user_model()
-        exists = User.objects.filter(email=email).exists()
+        exists = User.objects.filter(email__exact=email).exists()
         return JsonResponse({'exists': exists})
     else:
         return JsonResponse({'status': 'error', 'errors': 'Invalid request'}, status=400)
@@ -239,7 +241,11 @@ def reset_password(request):
 
             # Get the user
             User = get_user_model()
-            user = User.objects.get(email=email)
+            try:
+                user = User.objects.get(email__iexact=email)
+            except User.DoesNotExist:
+                print(f"No existe un usuario con el correo electrónico: {email}")
+                return JsonResponse({'status': 'error', 'errors': 'No existe un usuario con este correo electrónico'}, status=400)
 
             # Generate the token
             token = default_token_generator.make_token(user)
