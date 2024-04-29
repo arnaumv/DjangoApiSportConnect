@@ -97,8 +97,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportconnect',
-        'USER': 'Admin',
-        'PASSWORD': 'P@ssw0rd12345.',
+        'USER': 'root',
+        'PASSWORD': 'P@ssw0rd',
         'HOST': 'localhost',  
         'PORT': '3306',        
     }
@@ -169,7 +169,7 @@ CORS_ALLOWED_ORIGINS = [
      "http://localhost:8000",
 ]
 
-MEDIA_ROOT = '/var/www/DjangoApiSportConnect/myapp/Media/profile_photos/'
+MEDIA_ROOT = '/home/super/Documents/GitHub/DjangoApiSportConnect/myapp/Media/profile_photos/'
 MEDIA_URL = '/Media/profile_photos/'
 #AUTH_USER_MODEL = 'myapp.User'
 
