@@ -344,7 +344,6 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 import os
 
-
 @api_view(['POST'])
 def update_user(request, username):
     try:
@@ -359,6 +358,10 @@ def update_user(request, username):
             user.description = request.data['description']
         if 'birthdate' in request.data and request.data['birthdate'] != "":
             user.birthdate = request.data['birthdate']
+        if 'instagram' in request.data and request.data['instagram'] != "":
+            user.instagram = request.data['instagram']  # Nuevo campo Instagram
+        if 'twitter' in request.data and request.data['twitter'] != "":
+            user.twitter = request.data['twitter']  # Nuevo campo Twitter
 
         # Manejar la subida de la imagen
         if 'image' in request.FILES:

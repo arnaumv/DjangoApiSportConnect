@@ -12,6 +12,9 @@ class User(AbstractUser):
     description = models.TextField(blank=True, null=True)  # Nuevo campo descripción
     image_path = models.ImageField(upload_to='profile_photos', default='User_photo.png')
 
+    instagram = models.CharField(max_length=255, blank=True, null=True)  # Nuevo campo Instagram
+    twitter = models.CharField(max_length=255, blank=True, null=True)  # Nuevo campo Twitter
+
     is_reset_link_used = models.BooleanField(default=False)  # Add this line
 
     # Modificar los nombres de los accesores inversos
