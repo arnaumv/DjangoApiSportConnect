@@ -255,8 +255,8 @@ def reset_password(request):
 
             # Create the email content
             subject = 'Restablecer contraseña'
-            current_site = get_current_site(request)
-            password_reset_url = f"http://{current_site.domain}{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}"
+            #current_site = get_current_site(request)
+            password_reset_url = f"https://sportconnect.ieti.site{reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})}"
             message = f'Haz clic en el enlace para restablecer tu contraseña: {password_reset_url}'
             from_email = 'sportconnect@gmail.com' 
 
