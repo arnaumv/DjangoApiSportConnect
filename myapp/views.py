@@ -30,30 +30,30 @@ from django.utils.encoding import smart_str
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
 # VIEW PARA INICIAR SESION
 class LoginView(views.APIView):
     def post(self, request, *args, **kwargs):
-        username = request.data.get("username", "")
+        email = request.data.get("email", "")
         password = request.data.get("password", "")
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
             if check_password(password, user.password):
                 refresh = RefreshToken.for_user(user)
                 return Response({
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
+                    'username': user.username,  # Añade el nombre de usuario a la respuesta
                 })
             else:
                 return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
 # VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
 
 
 class UserProfileView(views.APIView):
     def get(self, request, username, *args, **kwargs):
+        print('Username:', username)  # Imprimir el nombre de usuario
         user = get_object_or_404(User, username=username)
         serializer = UserSerializer(user)
         return Response(serializer.data)  # Devolver los datos serializados directamente
