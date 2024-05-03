@@ -370,14 +370,17 @@ class Command(BaseCommand):
     ]
 
         def create_fake_user():
-            for _ in range(100):  # Cambia el rango a la cantidad de usuarios que quieres crear
+            
+            catalonia_cities = ['Barcelona', 'Girona', 'Badalona', 'Mataró', 'Santa Coloma de Gramenet', 'Sant Joan Despí', 'Esplugues de Llobregat', 'Sant Feliu de Llobregat', 'Cornellà de Llobregat', 'Gavà', 'Pallejà', 'Sant Boi de Llobregat', 'el Prat de Llobregat', 'Sant Just Desvern', 'Hospitales de Llobregat','Barcelona']  
+
+            for _ in range(100):  
                 User.objects.create(
                     username=fake.unique.user_name(),
                     email=fake.unique.email(),
-                    password=make_password('P@ssw0rd'),  # Usa una contraseña predeterminada
-                    city=fake.city(),
-                    birthdate=fake.date_of_birth(minimum_age=12, maximum_age=90),  # Edades entre 18 y 90
-                    description=fake.text(max_nb_chars=50),  # Descripción de máximo 50 caracteres
+                    password=make_password('P@ssw0rd'),  
+                    city=random.choice(catalonia_cities),  
+                    birthdate=fake.date_of_birth(minimum_age=12, maximum_age=90),  
+                    description=fake.sentence(nb_words=10),  # Generar una frase en español de 10 palabras
                     instagram=fake.user_name(),
                     twitter=fake.user_name(),
                 )
