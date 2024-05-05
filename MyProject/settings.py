@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'rest_framework.authtoken',  # Añade esta línea
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,11 +65,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'allauth.account.middleware.AccountMiddleware',  # Añade esta línea
+    
     'django.middleware.locale.LocaleMiddleware',
 
 ]
-
+SITE_ID = 1
 ROOT_URLCONF = 'MyProject.urls'
 
 TEMPLATES = [

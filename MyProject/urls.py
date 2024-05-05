@@ -28,6 +28,7 @@ urlpatterns = [
     path('leave-event/', leave_event, name='leave-event'),  # Agrega la URL para leave_event
     path('check-joined/', views.check_joined, name='check_joined'),
     path('cancel-event/', views.cancel_event, name='cancel_event'),
+    path('accounts/', include('allauth.urls')),
 
 
     path('event/<int:event_id>/participants', get_participants, name='get_participants'),
