@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from myapp.views import (
     UserViewSet, LoginView, UserProfileView, EventCreateViewSet, EventsJoinedView,
-    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView # Importa la nueva vista leave_event
+    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView,GoogleLogin # Importa la nueva vista leave_event
 )
 from myapp import views
 from django.conf.urls.static import static
@@ -28,6 +28,9 @@ urlpatterns = [
     path('leave-event/', leave_event, name='leave-event'),  # Agrega la URL para leave_event
     path('check-joined/', views.check_joined, name='check_joined'),
     path('cancel-event/', views.cancel_event, name='cancel_event'),
+    path('rest-auth/google/', GoogleLogin.as_view(), name='google_login'),
+     path('rest-auth/', include('rest_auth.urls')),
+    path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('accounts/', include('allauth.urls')),
 
 

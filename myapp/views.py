@@ -34,6 +34,7 @@ class GoogleLogin(SocialLoginView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    
 # VIEW PARA INICIAR SESION
 class LoginView(views.APIView):
     def post(self, request, *args, **kwargs):

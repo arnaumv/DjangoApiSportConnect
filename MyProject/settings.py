@@ -70,6 +70,24 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
 
 ]
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '1038434820629-rk4fbglu4h47b7045qcudod0jq1ct56l.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
 SITE_ID = 1
 ROOT_URLCONF = 'MyProject.urls'
 
