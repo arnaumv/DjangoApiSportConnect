@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from myapp.views import (
     UserViewSet, LoginView, UserProfileView, EventCreateViewSet, EventsJoinedView,
-    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView, FollowUserView # Importa la nueva vista leave_event
+    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView, FollowUserView, IsFollowingView, follow, UnfollowView # Importa la nueva vista leave_event
 )
 from myapp import views
 from django.conf.urls.static import static
@@ -30,7 +30,10 @@ urlpatterns = [
     path('cancel-event/', views.cancel_event, name='cancel_event'),
   
 
-    path('follow/<str:username>/', FollowUserView.as_view(), name='follow_user'),
+    path('follow/', views.follow, name='follow'),
+    path('isFollowing/<str:current_username>/<str:selected_username>/', IsFollowingView.as_view(), name='is-following'),
+    path('unfollow/<str:current_username>/<str:selected_username>/', UnfollowView.as_view(), name='unfollow'),
+
 
 
     path('event/<int:event_id>/participants', get_participants, name='get_participants'),

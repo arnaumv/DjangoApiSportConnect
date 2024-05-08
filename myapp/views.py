@@ -50,7 +50,7 @@ class LoginView(views.APIView):
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         
 
-        
+
 # VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
 
 from django.db.models import Count
@@ -62,6 +62,8 @@ class UserProfileView(views.APIView):
         events_count = user.event_set.count()  # Contar los eventos creados por el usuario
         user_data = UserSerializer(user).data
         user_data['events_count'] = events_count  # Agregar el conteo de eventos al diccionario
+        user_data['followers_count'] = user.followers_count  # Agregar el conteo de seguidores al diccionario
+        user_data['following_count'] = user.following_count  # Agregar el conteo de seguidos al diccionario
         return Response(user_data)
 
 ## VIEW QUE COMPRUEBA EL ID DEL USERANME PARA CREAR EL EVENTO (CREATE.HTML)
@@ -482,52 +484,92 @@ class FollowUserView(View):
         return JsonResponse({"message": f"Ahora estás siguiendo a {username}"}, status=200)
 
 
-class FollowUserView(View):
-    def post(self, request, username):
-        # Buscar el usuario a seguir
-        user_to_follow = User.objects.get(username=username)
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import User, UserFollowing
+import json
 
-        # A  adir el usuario a seguir a la lista de usuarios que el usuario actual est   siguiendo
-        request.user.following.add(user_to_follow)
 
-        # Actualizar el n  mero de seguidores del usuario a seguir
-        user_to_follow.followers_count = user_to_follow.followers_set.count()
-        user_to_follow.save()
 
-        # Actualizar el n  mero de seguidos del usuario actual
-        request.user.following_count = request.user.followings.count()
-        request.user.save()
+class IsFollowingView(View):
+    def get(self, request, *args, **kwargs):
+        # Obtener el nombre de usuario del usuario que está actualmente conectado
+        current_username = self.kwargs.get('current_username')
+
+        # Obtener el nombre de usuario del usuario que se está visualizando
+        selected_username = self.kwargs.get('selected_username')
+
+        # Obtener los objetos de usuario
+        current_user = User.objects.get(username=current_username)
+        selected_user = User.objects.get(username=selected_username)
+
+        # Verificar si el usuario actual está siguiendo al usuario seleccionado
+        is_following = UserFollowing.objects.filter(user_id=current_user, following_user_id=selected_user).exists()
+
+        # Devolver la respuesta
+        return JsonResponse({'isFollowing': is_following})
+
+@csrf_exempt
+def follow(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        current_username = data.get('current_username')
+        following_username = data.get('following_username')
+
+        if not current_username or not following_username:
+            return JsonResponse({'error': 'Current username or following username not provided'}, status=400)
+
+        if not User.objects.filter(username=following_username).exists():
+            return JsonResponse({'error': 'User does not exist'}, status=404)
+
+        current_user = User.objects.get(username=current_username)
+        following_user = User.objects.get(username=following_username)
+
+        UserFollowing.objects.create(user_id=current_user, following_user_id=following_user)
+
+        current_user.following_count += 1
+        following_user.followers_count += 1
+
+        current_user.save()
+        following_user.save()
 
         return JsonResponse({
-            "message": f"Ahora est  s siguiendo a {username}",
-            "followers_count": user_to_follow.followers_count,
-            "following_count": request.user.following_count
-        }, status=200)
+            'followers_count': following_user.followers_count,
+            'following_count': current_user.following_count
+        })
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
+@method_decorator(csrf_exempt, name='dispatch')
+class UnfollowView(View):
+    def post(self, request, *args, **kwargs):
+        # Obtener el nombre de usuario del usuario que está actualmente conectado
+        current_username = self.kwargs.get('current_username')
 
-class UnfollowUserView(View):
-    def post(self, request, username):
-        # Buscar el usuario a dejar de seguir
-        user_to_unfollow = User.objects.get(username=username)
+        # Obtener el nombre de usuario del usuario que se está visualizando
+        selected_username = self.kwargs.get('selected_username')
 
-        # Eliminar el usuario a dejar de seguir de la lista de usuarios que el usuario actual est   siguiendo
-        request.user.following.remove(user_to_unfollow)
+        # Obtener los objetos de usuario
+        current_user = User.objects.get(username=current_username)
+        selected_user = User.objects.get(username=selected_username)
 
-        # Actualizar el n  mero de seguidores del usuario a dejar de seguir
-        user_to_unfollow.followers_count = user_to_unfollow.followers_set.count()
-        user_to_unfollow.save()
+        # Eliminar la relación de seguimiento
+        UserFollowing.objects.filter(user_id=current_user, following_user_id=selected_user).delete()
 
-        # Actualizar el n  mero de seguidos del usuario actual
-        request.user.following_count = request.user.followings.count()
-        request.user.save()
+        # Actualizar el contador de seguidores y seguidos
+        current_user.following_count -= 1
+        selected_user.followers_count -= 1
+        current_user.save()
+        selected_user.save()
 
+        # Devolver la respuesta
         return JsonResponse({
-            "message": f"Has dejado de seguir a {username}",
-            "followers_count": user_to_unfollow.followers_count,
-            "following_count": request.user.following_count
-        }, status=200)
+            'success': True,
+            'followers_count': selected_user.followers_count,
+            'following_count': current_user.following_count
+        })
 
-
+    
 # @csrf_exempt
 # def upload_image(request, username):
 #     if request.method == 'POST':

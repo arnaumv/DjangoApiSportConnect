@@ -41,27 +41,6 @@ class UserFollowing(models.Model):
     def __str__(self):
         return f"{self.user_id} follows {self.following_user_id}"
 
-    def save(self, *args, **kwargs):
-        # Incrementar el contador de seguidos del usuario que sigue
-        self.user_id.following_count += 1
-        self.user_id.save()
-
-        # Incrementar el contador de seguidores del usuario seguido
-        self.following_user_id.followers_count += 1
-        self.following_user_id.save()
-
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        # Decrementar el contador de seguidos del usuario que deja de seguir
-        self.user_id.following_count -= 1
-        self.user_id.save()
-
-        # Decrementar el contador de seguidores del usuario que deja de ser seguido
-        self.following_user_id.followers_count -= 1
-        self.following_user_id.save()
-
-        super().delete(*args, **kwargs)
 
 # MODELO CREAR EVENTO
 from django.db import models

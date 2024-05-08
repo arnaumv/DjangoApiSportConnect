@@ -370,7 +370,7 @@ class Command(BaseCommand):
     ]
 
         def create_fake_user():
-            catalonia_cities = ['Barcelona', 'Girona', 'Badalona', 'Mataró', 'Santa Coloma de Gramenet', 'Sant Joan Despí', 'Esplugues de Llobregat', 'Sant Feliu de Llobregat', 'Cornellà de Llobregat', 'Gavà', 'Pallejà', 'Sant Boi de Llobregat', 'el Prat de Llobregat', 'Sant Just Desvern', 'Hospitales de Llobregat','Barcelona']  
+            catalonia_cities = ['Barcelona', 'Girona', 'Badalona', 'Matar  ', 'Santa Coloma de Gramenet', 'Sant Joan Desp  ', 'Esplugues de Llobregat', 'Sant Feliu de Llobregat', 'Cornell   de Llobregat', 'Gav  ', 'Pallej  ', 'Sant Boi de Llobregat', 'el Prat de Llobregat', 'Sant Just Desvern', 'Hospitales de Llobregat','Barcelona']  
 
             for _ in range(100):  
                 user = User.objects.create(
@@ -379,34 +379,38 @@ class Command(BaseCommand):
                     password=make_password('P@ssw0rd'),  
                     city=random.choice(catalonia_cities),  
                     birthdate=fake.date_of_birth(minimum_age=12, maximum_age=90),  
-                    description=fake.sentence(nb_words=10),  # Generar una frase en español de 10 palabras
+                    description=fake.sentence(nb_words=10),  # Generar una frase en espa  ol de 10 palabras
                     instagram=fake.user_name(),
                     twitter=fake.user_name(),
-                    image_path='User_photo.png',  # Añadir una imagen de perfil por defecto
-                    is_reset_link_used=False,  # Añadir un valor por defecto para el campo is_reset_link_used
-                    followers_count=0,  # Añadir un valor por defecto para el campo followers_count
-                    following_count=0,  # Añadir un valor por defecto para el campo following_count
+                    image_path='User_photo.png',  # A  adir una imagen de perfil por defecto
+                    is_reset_link_used=False,  # A  adir un valor por defecto para el campo is_reset_link_used
+                    followers_count=0,  # A  adir un valor por defecto para el campo followers_count
+                    following_count=0,  # A  adir un valor por defecto para el campo following_count
                 )
 
                 # Crear relaciones de seguimiento falsas
                 for _ in range(random.randint(0, 10)):  # Cada usuario sigue a entre 0 y 10 usuarios
                     user_to_follow = User.objects.exclude(id=user.id).order_by('?').first()  # Seleccionar un usuario al azar para seguir
-                    if not UserFollowing.objects.filter(user_id=user, following_user_id=user_to_follow).exists():  # Comprobar si la relación de seguimiento ya existe
+                    if user_to_follow and not UserFollowing.objects.filter(user_id=user, following_user_id=user_to_follow).exists():  # Comprobar si la relación de seguimiento ya existe
                         UserFollowing.objects.create(user_id=user, following_user_id=user_to_follow)
+                        user.following_count += 1
+                        user_to_follow.followers_count += 1
+                        user.save()
+                        user_to_follow.save()
 
         def create_fake_event():
             users = User.objects.all()
             for _ in range(100):  # Cambia el rango a la cantidad de eventos que quieres crear
-                location = random.choice(locations)  # Selecciona una ubicación aleatoria
+                location = random.choice(locations)  # Selecciona una ubicaci  n aleatoria
                 Event.objects.create(
                     title=fake.sentence(nb_words=6),
-                    sport=random.choice(location['actividad']),  # Selecciona una actividad de la ubicación
+                    sport=random.choice(location['actividad']),  # Selecciona una actividad de la ubicaci  n
                     date=fake.date_between(start_date='today', end_date='+1y'),  # Solo fechas futuras
                     time=fake.time(),
-                    location=location['nombre de ubicacion'],  # Usa el nombre de la ubicación seleccionada
+                    location=location['nombre de ubicacion'],  # Usa el nombre de la ubicaci  n seleccionada
                     description=fake.text(),
                     user=random.choice(users),
-                    image_path=location['imagen'],  # Usa la ruta de la imagen de la ubicación seleccionada
+                    image_path=location['imagen'],  # Usa la ruta de la imagen de la ubicaci  n seleccionada
                 )
 
         def create_fake_events_joined():
