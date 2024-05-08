@@ -23,11 +23,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from dj_rest_auth.registration.views import SocialLoginView
-
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
 
 
 # VIEW PARA CREAR USUARIO
@@ -53,15 +48,21 @@ class LoginView(views.APIView):
                 return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+
+        
 # VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
 
+from django.db.models import Count
 
 class UserProfileView(views.APIView):
     def get(self, request, username, *args, **kwargs):
         print('Username:', username)  # Imprimir el nombre de usuario
         user = get_object_or_404(User, username=username)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)  # Devolver los datos serializados directamente
+        events_count = user.event_set.count()  # Contar los eventos creados por el usuario
+        user_data = UserSerializer(user).data
+        user_data['events_count'] = events_count  # Agregar el conteo de eventos al diccionario
+        return Response(user_data)
 
 ## VIEW QUE COMPRUEBA EL ID DEL USERANME PARA CREAR EL EVENTO (CREATE.HTML)
 class UserIdView(views.APIView):
@@ -470,6 +471,61 @@ def delete_event(request):
     
 
 
+class FollowUserView(View):
+    def post(self, request, username):
+        # Buscar el usuario a seguir
+        user_to_follow = User.objects.get(username=username)
+
+        # Añadir el usuario a seguir a la lista de usuarios que el usuario actual está siguiendo
+        request.user.following.add(user_to_follow)
+
+        return JsonResponse({"message": f"Ahora estás siguiendo a {username}"}, status=200)
+
+
+class FollowUserView(View):
+    def post(self, request, username):
+        # Buscar el usuario a seguir
+        user_to_follow = User.objects.get(username=username)
+
+        # A  adir el usuario a seguir a la lista de usuarios que el usuario actual est   siguiendo
+        request.user.following.add(user_to_follow)
+
+        # Actualizar el n  mero de seguidores del usuario a seguir
+        user_to_follow.followers_count = user_to_follow.followers_set.count()
+        user_to_follow.save()
+
+        # Actualizar el n  mero de seguidos del usuario actual
+        request.user.following_count = request.user.followings.count()
+        request.user.save()
+
+        return JsonResponse({
+            "message": f"Ahora est  s siguiendo a {username}",
+            "followers_count": user_to_follow.followers_count,
+            "following_count": request.user.following_count
+        }, status=200)
+
+
+class UnfollowUserView(View):
+    def post(self, request, username):
+        # Buscar el usuario a dejar de seguir
+        user_to_unfollow = User.objects.get(username=username)
+
+        # Eliminar el usuario a dejar de seguir de la lista de usuarios que el usuario actual est   siguiendo
+        request.user.following.remove(user_to_unfollow)
+
+        # Actualizar el n  mero de seguidores del usuario a dejar de seguir
+        user_to_unfollow.followers_count = user_to_unfollow.followers_set.count()
+        user_to_unfollow.save()
+
+        # Actualizar el n  mero de seguidos del usuario actual
+        request.user.following_count = request.user.followings.count()
+        request.user.save()
+
+        return JsonResponse({
+            "message": f"Has dejado de seguir a {username}",
+            "followers_count": user_to_unfollow.followers_count,
+            "following_count": request.user.following_count
+        }, status=200)
 
 
 # @csrf_exempt

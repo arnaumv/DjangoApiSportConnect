@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from faker import Faker
 from django.contrib.auth.hashers import make_password
-from myapp.models import User, Event, EventsJoined
+from myapp.models import User, Event, EventsJoined, UserFollowing
 import random
 from datetime import datetime, timedelta
 
@@ -370,11 +370,10 @@ class Command(BaseCommand):
     ]
 
         def create_fake_user():
-            
             catalonia_cities = ['Barcelona', 'Girona', 'Badalona', 'Mataró', 'Santa Coloma de Gramenet', 'Sant Joan Despí', 'Esplugues de Llobregat', 'Sant Feliu de Llobregat', 'Cornellà de Llobregat', 'Gavà', 'Pallejà', 'Sant Boi de Llobregat', 'el Prat de Llobregat', 'Sant Just Desvern', 'Hospitales de Llobregat','Barcelona']  
 
             for _ in range(100):  
-                User.objects.create(
+                user = User.objects.create(
                     username=fake.unique.user_name(),
                     email=fake.unique.email(),
                     password=make_password('P@ssw0rd'),  
@@ -383,7 +382,17 @@ class Command(BaseCommand):
                     description=fake.sentence(nb_words=10),  # Generar una frase en español de 10 palabras
                     instagram=fake.user_name(),
                     twitter=fake.user_name(),
+                    image_path='User_photo.png',  # Añadir una imagen de perfil por defecto
+                    is_reset_link_used=False,  # Añadir un valor por defecto para el campo is_reset_link_used
+                    followers_count=0,  # Añadir un valor por defecto para el campo followers_count
+                    following_count=0,  # Añadir un valor por defecto para el campo following_count
                 )
+
+                # Crear relaciones de seguimiento falsas
+                for _ in range(random.randint(0, 10)):  # Cada usuario sigue a entre 0 y 10 usuarios
+                    user_to_follow = User.objects.exclude(id=user.id).order_by('?').first()  # Seleccionar un usuario al azar para seguir
+                    if not UserFollowing.objects.filter(user_id=user, following_user_id=user_to_follow).exists():  # Comprobar si la relación de seguimiento ya existe
+                        UserFollowing.objects.create(user_id=user, following_user_id=user_to_follow)
 
         def create_fake_event():
             users = User.objects.all()

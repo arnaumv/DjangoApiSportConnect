@@ -9,7 +9,7 @@ class User(AbstractUser):
     password = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     birthdate = models.DateField()
-    description = models.TextField(blank=True, null=True)  # Nuevo campo descripción
+    description = models.TextField(blank=True, null=True)  # Nuevo campo descripci  n
     image_path = models.ImageField(upload_to='profile_photos', default='User_photo.png')
 
     instagram = models.CharField(max_length=255, blank=True, null=True)  # Nuevo campo Instagram
@@ -20,6 +20,48 @@ class User(AbstractUser):
     # Modificar los nombres de los accesores inversos
     groups = models.ManyToManyField(Group, related_name="customuser_groups", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="customuser_permissions", blank=True)
+
+    # Nuevo campo para seguir a los usuarios
+    following = models.ManyToManyField('self', through='UserFollowing', related_name='follows', symmetrical=False)
+    followers_count = models.IntegerField(default=0)
+    following_count = models.IntegerField(default=0)
+
+
+class UserFollowing(models.Model):
+    user_id = models.ForeignKey(User, related_name='followings', on_delete=models.CASCADE)
+    following_user_id = models.ForeignKey(User, related_name='followers_set', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user_id', 'following_user_id'], name="unique_followers")
+        ]
+        ordering = ["-created"]
+
+    def __str__(self):
+        return f"{self.user_id} follows {self.following_user_id}"
+
+    def save(self, *args, **kwargs):
+        # Incrementar el contador de seguidos del usuario que sigue
+        self.user_id.following_count += 1
+        self.user_id.save()
+
+        # Incrementar el contador de seguidores del usuario seguido
+        self.following_user_id.followers_count += 1
+        self.following_user_id.save()
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Decrementar el contador de seguidos del usuario que deja de seguir
+        self.user_id.following_count -= 1
+        self.user_id.save()
+
+        # Decrementar el contador de seguidores del usuario que deja de ser seguido
+        self.following_user_id.followers_count -= 1
+        self.following_user_id.save()
+
+        super().delete(*args, **kwargs)
 
 # MODELO CREAR EVENTO
 from django.db import models
@@ -46,3 +88,9 @@ class EventsJoined(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     join_date = models.DateTimeField(auto_now_add=True)
     notify_deleted = models.BooleanField(default=False)  # Nueva columna
+
+
+
+
+
+
