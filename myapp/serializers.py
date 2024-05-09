@@ -76,7 +76,7 @@ from .models import EventNotification
 class EventNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventNotification
-        fields = ['type', 'username', 'event_title', 'event_sport', 'event_location', 'event_date', 'event_time', 'message', 'created_at']
+        fields = ['type', 'username', 'recipient_username', 'event_title', 'event_sport', 'event_location', 'event_date', 'event_time', 'message', 'created_at']
 
     def validate(self, data):
         # Aquí puedes agregar cualquier lógica de validación personalizada.

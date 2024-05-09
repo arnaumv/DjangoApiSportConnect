@@ -582,20 +582,29 @@ from rest_framework import viewsets
 from .models import EventNotification
 from .serializers import EventNotificationSerializer
 
+from rest_framework.response import Response
+from rest_framework import status
+
 class EventNotificationViewSet(viewsets.ModelViewSet):
     serializer_class = EventNotificationSerializer
 
     def get_queryset(self):
         """
         Optionally restricts the returned notifications to a given user,
-        by filtering against a `username` query parameter in the URL.
+        by filtering against a `recipient_username` query parameter in the URL.
         """
-        queryset = EventNotification.objects.all()
-        username = self.request.query_params.get('username', None)
-        if username is not None:
-            queryset = queryset.filter(username=username)
+        queryset = EventNotification.objects.all().order_by('-created_at')
+        recipient_username = self.request.query_params.get('recipient_username', None)
+        if recipient_username is not None:
+            queryset = queryset.filter(recipient_username=recipient_username)
         return queryset
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404

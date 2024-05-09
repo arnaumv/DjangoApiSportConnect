@@ -78,7 +78,8 @@ class EventNotification(models.Model):
     ]
 
     type = models.CharField(max_length=6, choices=TYPE_CHOICES)
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255)  # El usuario que realiza la acción
+    recipient_username = models.CharField(max_length=255, default='default_username')
     event_title = models.CharField(max_length=255, blank=True)
     event_sport = models.CharField(max_length=255, blank=True)
     event_location = models.CharField(max_length=255, blank=True)
