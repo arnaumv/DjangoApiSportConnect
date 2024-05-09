@@ -540,6 +540,11 @@ def follow(request):
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+
+
+
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class UnfollowView(View):
     def post(self, request, *args, **kwargs):
@@ -568,6 +573,62 @@ class UnfollowView(View):
             'followers_count': selected_user.followers_count,
             'following_count': current_user.following_count
         })
+
+from rest_framework import viewsets
+from .models import EventNotification
+from .serializers import EventNotificationSerializer
+
+from rest_framework import viewsets
+from .models import EventNotification
+from .serializers import EventNotificationSerializer
+
+class EventNotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = EventNotificationSerializer
+
+    def get_queryset(self):
+        """
+        Optionally restricts the returned notifications to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = EventNotification.objects.all()
+        username = self.request.query_params.get('username', None)
+        if username is not None:
+            queryset = queryset.filter(username=username)
+        return queryset
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views import View
+from .models import EventNotification
+
+class DeleteNotificationView(View):
+    def delete(self, request, notification_id):
+        notification = get_object_or_404(EventNotification, id=notification_id)
+        notification.delete()
+        return JsonResponse({'message': 'Notification deleted.'})
+
+# from django.forms.models import model_to_dict
+# from django.http import JsonResponse
+# from django.views import View
+# from .models import Notification
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CreateNotificationView(View):
+#     def post(self, request):
+#         data = json.loads(request.body)
+#         notification = Notification.objects.create(
+#             follower_username=data['follower_username'],
+#             followed_username=data['followed_username'],
+#             message=data['message']
+#         )
+#         return JsonResponse({'notification': model_to_dict(notification)}, status=201)
+
+# class GetNotificationsView(View):
+#     def get(self, request, username):
+#         notifications = Notification.objects.filter(followed_username=username)
+#         return JsonResponse({'notifications': [model_to_dict(n) for n in notifications]})
+
 
     
 # @csrf_exempt

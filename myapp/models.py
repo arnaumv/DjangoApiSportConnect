@@ -70,6 +70,19 @@ class EventsJoined(models.Model):
 
 
 
+class EventNotification(models.Model):
+    TYPE_CHOICES = [
+        ('follow', 'Follow'),
+        ('create', 'Create'),
+        ('join', 'Join'),
+    ]
 
-
-
+    type = models.CharField(max_length=6, choices=TYPE_CHOICES)
+    username = models.CharField(max_length=255)
+    event_title = models.CharField(max_length=255, blank=True)
+    event_sport = models.CharField(max_length=255, blank=True)
+    event_location = models.CharField(max_length=255, blank=True)
+    event_date = models.DateTimeField(null=True, blank=True)
+    event_time = models.TimeField(null=True, blank=True)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)

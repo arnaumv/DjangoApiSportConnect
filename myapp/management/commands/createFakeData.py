@@ -401,17 +401,26 @@ class Command(BaseCommand):
         def create_fake_event():
             users = User.objects.all()
             for _ in range(100):  # Cambia el rango a la cantidad de eventos que quieres crear
-                location = random.choice(locations)  # Selecciona una ubicaci  n aleatoria
-                Event.objects.create(
+                location = random.choice(locations)  # Selecciona una ubicación aleatoria
+                user = random.choice(users)
+                event = Event.objects.create(
                     title=fake.sentence(nb_words=6),
-                    sport=random.choice(location['actividad']),  # Selecciona una actividad de la ubicaci  n
+                    sport=random.choice(location['actividad']),  # Selecciona una actividad de la ubicación
                     date=fake.date_between(start_date='today', end_date='+1y'),  # Solo fechas futuras
                     time=fake.time(),
-                    location=location['nombre de ubicacion'],  # Usa el nombre de la ubicaci  n seleccionada
+                    location=location['nombre de ubicacion'],  # Usa el nombre de la ubicación seleccionada
                     description=fake.text(),
-                    user=random.choice(users),
-                    image_path=location['imagen'],  # Usa la ruta de la imagen de la ubicaci  n seleccionada
+                    user=user,
+                    image_path=location['imagen'],  # Usa la ruta de la imagen de la ubicación seleccionada
                 )
+
+            # El usuario que crea el evento se une automáticamente a ese evento
+            EventsJoined.objects.create(
+                user_id=user,
+                username=user.username,
+                event=event,
+                join_date=fake.date_time_between(start_date='now', end_date='+1y'),  # Solo fechas futuras
+            )
 
         def create_fake_events_joined():
             users = User.objects.all()
