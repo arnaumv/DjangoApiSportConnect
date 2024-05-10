@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-
+    'django.contrib.sites',
+    
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,10 +65,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'allauth.account.middleware.AccountMiddleware',  # Añade esta línea
+    
     'django.middleware.locale.LocaleMiddleware',
 
 ]
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
 
 ROOT_URLCONF = 'MyProject.urls'
 
@@ -175,6 +182,7 @@ CORS_ALLOWED_ORIGINS = [
 
 
 MEDIA_ROOT = '/home/xavi/Documents/GitHub/DjangoApiSportConnect/myapp/Media/profile_photos/'
+# MEDIA_ROOT = '/home/super/Documents/GitHub/DjangoApiSportConnect/myapp/Media/profile_photos/'
 MEDIA_URL = '/Media/profile_photos/'
 #AUTH_USER_MODEL = 'myapp.User'
 
