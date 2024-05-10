@@ -414,13 +414,13 @@ class Command(BaseCommand):
                     image_path=location['imagen'],  # Usa la ruta de la imagen de la ubicación seleccionada
                 )
 
-            # El usuario que crea el evento se une automáticamente a ese evento
-            EventsJoined.objects.create(
-                user_id=user,
-                username=user.username,
-                event=event,
-                join_date=fake.date_time_between(start_date='now', end_date='+1y'),  # Solo fechas futuras
-            )
+                # El usuario que crea el evento se une automáticamente a ese evento
+                EventsJoined.objects.create(
+                    user_id=user,
+                    username=user.username,
+                    event=event,
+                    join_date=fake.date_time_between(start_date='now', end_date='+1y'),  # Solo fechas futuras
+                )
 
         def create_fake_events_joined():
             users = User.objects.all()
