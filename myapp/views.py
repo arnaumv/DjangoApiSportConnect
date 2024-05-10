@@ -611,9 +611,11 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from .models import EventNotification
 
+# Django view
 class DeleteNotificationView(View):
     def delete(self, request, notification_id):
-        notification = get_object_or_404(EventNotification, id=notification_id)
+        username = request.GET.get('username')
+        notification = get_object_or_404(EventNotification, id=notification_id, recipient_username=username)
         notification.delete()
         return JsonResponse({'message': 'Notification deleted.'})
 
