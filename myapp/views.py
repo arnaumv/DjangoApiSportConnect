@@ -23,17 +23,13 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from dj_rest_auth.registration.views import SocialLoginView
-
-class GoogleLogin(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
 
 
 # VIEW PARA CREAR USUARIO
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    
 # VIEW PARA INICIAR SESION
 class LoginView(views.APIView):
     def post(self, request, *args, **kwargs):
@@ -52,15 +48,23 @@ class LoginView(views.APIView):
                 return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         except User.DoesNotExist:
             return Response({"error": "Invalid login credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+
+
 # VIEW PARA DEVOLVER INFORMACION DEL USAURIO (PROFILE.HTML)
 
+from django.db.models import Count
 
 class UserProfileView(views.APIView):
     def get(self, request, username, *args, **kwargs):
         print('Username:', username)  # Imprimir el nombre de usuario
         user = get_object_or_404(User, username=username)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)  # Devolver los datos serializados directamente
+        events_count = user.event_set.count()  # Contar los eventos creados por el usuario
+        user_data = UserSerializer(user).data
+        user_data['events_count'] = events_count  # Agregar el conteo de eventos al diccionario
+        user_data['followers_count'] = user.followers_count  # Agregar el conteo de seguidores al diccionario
+        user_data['following_count'] = user.following_count  # Agregar el conteo de seguidos al diccionario
+        return Response(user_data)
 
 ## VIEW QUE COMPRUEBA EL ID DEL USERANME PARA CREAR EL EVENTO (CREATE.HTML)
 class UserIdView(views.APIView):
@@ -469,8 +473,175 @@ def delete_event(request):
     
 
 
+class FollowUserView(View):
+    def post(self, request, username):
+        # Buscar el usuario a seguir
+        user_to_follow = User.objects.get(username=username)
+
+        # Añadir el usuario a seguir a la lista de usuarios que el usuario actual está siguiendo
+        request.user.following.add(user_to_follow)
+
+        return JsonResponse({"message": f"Ahora estás siguiendo a {username}"}, status=200)
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import User, UserFollowing
+import json
+
+
+
+class IsFollowingView(View):
+    def get(self, request, *args, **kwargs):
+        # Obtener el nombre de usuario del usuario que está actualmente conectado
+        current_username = self.kwargs.get('current_username')
+
+        # Obtener el nombre de usuario del usuario que se está visualizando
+        selected_username = self.kwargs.get('selected_username')
+
+        # Obtener los objetos de usuario
+        current_user = User.objects.get(username=current_username)
+        selected_user = User.objects.get(username=selected_username)
+
+        # Verificar si el usuario actual está siguiendo al usuario seleccionado
+        is_following = UserFollowing.objects.filter(user_id=current_user, following_user_id=selected_user).exists()
+
+        # Devolver la respuesta
+        return JsonResponse({'isFollowing': is_following})
+
+@csrf_exempt
+def follow(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        current_username = data.get('current_username')
+        following_username = data.get('following_username')
+
+        if not current_username or not following_username:
+            return JsonResponse({'error': 'Current username or following username not provided'}, status=400)
+
+        if not User.objects.filter(username=following_username).exists():
+            return JsonResponse({'error': 'User does not exist'}, status=404)
+
+        current_user = User.objects.get(username=current_username)
+        following_user = User.objects.get(username=following_username)
+
+        UserFollowing.objects.create(user_id=current_user, following_user_id=following_user)
+
+        current_user.following_count += 1
+        following_user.followers_count += 1
+
+        current_user.save()
+        following_user.save()
+
+        return JsonResponse({
+            'followers_count': following_user.followers_count,
+            'following_count': current_user.following_count
+        })
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+
+
+
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UnfollowView(View):
+    def post(self, request, *args, **kwargs):
+        # Obtener el nombre de usuario del usuario que está actualmente conectado
+        current_username = self.kwargs.get('current_username')
+
+        # Obtener el nombre de usuario del usuario que se está visualizando
+        selected_username = self.kwargs.get('selected_username')
+
+        # Obtener los objetos de usuario
+        current_user = User.objects.get(username=current_username)
+        selected_user = User.objects.get(username=selected_username)
+
+        # Eliminar la relación de seguimiento
+        UserFollowing.objects.filter(user_id=current_user, following_user_id=selected_user).delete()
+
+        # Actualizar el contador de seguidores y seguidos
+        current_user.following_count -= 1
+        selected_user.followers_count -= 1
+        current_user.save()
+        selected_user.save()
+
+        # Devolver la respuesta
+        return JsonResponse({
+            'success': True,
+            'followers_count': selected_user.followers_count,
+            'following_count': current_user.following_count
+        })
+
+from rest_framework import viewsets
+from .models import EventNotification
+from .serializers import EventNotificationSerializer
+
+from rest_framework import viewsets
+from .models import EventNotification
+from .serializers import EventNotificationSerializer
+
+from rest_framework.response import Response
+from rest_framework import status
+
+class EventNotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = EventNotificationSerializer
+
+    def get_queryset(self):
+        """
+        Optionally restricts the returned notifications to a given user,
+        by filtering against a `recipient_username` query parameter in the URL.
+        """
+        queryset = EventNotification.objects.all().order_by('-created_at')
+        recipient_username = self.request.query_params.get('recipient_username', None)
+        if recipient_username is not None:
+            queryset = queryset.filter(recipient_username=recipient_username)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views import View
+from .models import EventNotification
+
+# Django view
+class DeleteNotificationView(View):
+    def delete(self, request, notification_id):
+        username = request.GET.get('username')
+        notification = get_object_or_404(EventNotification, id=notification_id, recipient_username=username)
+        notification.delete()
+        return JsonResponse({'message': 'Notification deleted.'})
+
+# from django.forms.models import model_to_dict
+# from django.http import JsonResponse
+# from django.views import View
+# from .models import Notification
+
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CreateNotificationView(View):
+#     def post(self, request):
+#         data = json.loads(request.body)
+#         notification = Notification.objects.create(
+#             follower_username=data['follower_username'],
+#             followed_username=data['followed_username'],
+#             message=data['message']
+#         )
+#         return JsonResponse({'notification': model_to_dict(notification)}, status=201)
+
+# class GetNotificationsView(View):
+#     def get(self, request, username):
+#         notifications = Notification.objects.filter(followed_username=username)
+#         return JsonResponse({'notifications': [model_to_dict(n) for n in notifications]})
+
+
+    
 # @csrf_exempt
 # def upload_image(request, username):
 #     if request.method == 'POST':

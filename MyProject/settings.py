@@ -38,11 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'rest_framework.authtoken',  # Añade esta línea
+    
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -70,7 +66,12 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
 
 ]
-SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
 ROOT_URLCONF = 'MyProject.urls'
 
 TEMPLATES = [

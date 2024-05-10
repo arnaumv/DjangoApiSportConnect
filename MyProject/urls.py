@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from myapp.views import (
     UserViewSet, LoginView, UserProfileView, EventCreateViewSet, EventsJoinedView,
-    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView # Importa la nueva vista leave_event
+    EventViewSet, UserIdView, join_event, get_participants, leave_event, delete_notification, EventsCreatedView,EventNotificationViewSet, FollowUserView, IsFollowingView, follow, UnfollowView # Importa la nueva vista leave_event
 )
 from myapp import views
 from django.conf.urls.static import static
@@ -14,6 +14,7 @@ router = DefaultRouter()
 router.register(r'usuario', UserViewSet, basename='usuario')
 router.register(r'event', EventCreateViewSet, basename='event')  
 router.register(r'event-filter', EventViewSet, basename='event-filter') 
+router.register(r'notification', EventNotificationViewSet, basename='eventnotification')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -28,7 +29,14 @@ urlpatterns = [
     path('leave-event/', leave_event, name='leave-event'),  # Agrega la URL para leave_event
     path('check-joined/', views.check_joined, name='check_joined'),
     path('cancel-event/', views.cancel_event, name='cancel_event'),
-    path('accounts/', include('allauth.urls')),
+  
+
+    path('follow/', views.follow, name='follow'),
+    path('isFollowing/<str:current_username>/<str:selected_username>/', IsFollowingView.as_view(), name='is-following'),
+    path('unfollow/<str:current_username>/<str:selected_username>/', UnfollowView.as_view(), name='unfollow'),
+
+    # path('notifications/<str:username>/', GetNotificationsView.as_view()),
+    # path('notification/<int:notification_id>/', DeleteNotificationView.as_view()),
 
 
     path('event/<int:event_id>/participants', get_participants, name='get_participants'),
