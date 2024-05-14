@@ -23,8 +23,9 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str
-
-
+from .models import User, UserFollowing
+import json
+from django.views import View
 # VIEW PARA CREAR USUARIO
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -385,9 +386,7 @@ def update_user(request, username):
     
 
 # VIEW PARA MOSTRAR NOTIFICACIONES CUANDO SE UNE A UN EVENTO.  
-from django.http import JsonResponse
-from django.views import View
-from .models import EventsJoined
+
 
 class EventsJoinedView(View):
     def get(self, request, *args, **kwargs):
@@ -484,10 +483,7 @@ class FollowUserView(View):
         return JsonResponse({"message": f"Ahora estás siguiendo a {username}"}, status=200)
 
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import User, UserFollowing
-import json
+
 
 
 
