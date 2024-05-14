@@ -17,6 +17,8 @@ router.register(r'event-filter', EventViewSet, basename='event-filter')
 router.register(r'notification', EventNotificationViewSet, basename='eventnotification')
 
 urlpatterns = [
+    path('', views.home, name='home'),
+
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
 
